@@ -3,6 +3,7 @@ package redempt.crunch.functional;
 import redempt.crunch.token.Token;
 import redempt.crunch.token.TokenType;
 
+import java.util.OptionalInt;
 import java.util.function.ToDoubleFunction;
 
 /**
@@ -11,22 +12,17 @@ import java.util.function.ToDoubleFunction;
  */
 public class Function implements Token {
 
-	/**
-	 * Sentinel value for variable args: the function accepts any number of arguments.
-	 */
-	public static final int VARIABLE_ARGS = -1;
-
 	private final String name;
-	private final int argCount;
+	private final OptionalInt argCount;
 	private final ToDoubleFunction<double[]> function;
 
 	/**
 	 * Create a Function
 	 * @param name The function name
-	 * @param argCount The number of arguments this Function will take, or {@link #VARIABLE_ARGS} for variable args
+	 * @param argCount The number of arguments this Function will take, or empty for variable args
 	 * @param function A lambda to take the arguments as a double array and return a value
 	 */
-	public Function(String name, int argCount, ToDoubleFunction<double[]> function) {
+	public Function(String name, OptionalInt argCount, ToDoubleFunction<double[]> function) {
 		this.function = function;
 		this.name = name;
 		this.argCount = argCount;
@@ -40,17 +36,10 @@ public class Function implements Token {
 	}
 
 	/**
-	 * @return The number of arguments this function takes, or {@link #VARIABLE_ARGS} if it accepts any number
+	 * @return The number of arguments this function takes, or empty if it accepts any number
 	 */
-	public int getArgCount() {
+	public OptionalInt getArgCount() {
 		return argCount;
-	}
-
-	/**
-	 * @return true if this function accepts a variable number of arguments
-	 */
-	public boolean isVariableArgs() {
-		return argCount == VARIABLE_ARGS;
 	}
 	
 	/**

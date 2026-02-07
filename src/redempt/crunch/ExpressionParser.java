@@ -15,6 +15,7 @@ import redempt.crunch.token.UnaryOperator;
 import redempt.crunch.token.Value;
 
 import java.util.Arrays;
+import java.util.OptionalInt;
 
 public class ExpressionParser {
 
@@ -183,58 +184,53 @@ public class ExpressionParser {
                 return new UnaryOperation(op, term);
             case FUNCTION:
                 Function function = (Function) token;
-                ArgumentList args = function.isVariableArgs()
-                    ? parseArgumentListVariable()
-                    : parseArgumentList(function.getArgCount());
+                ArgumentList args = parseArgumentList(function.getArgCount());
                 return new FunctionCall(function, args.getArguments());
         }
         error("Expected leading operation");
         return null;
     }
 
-    private ArgumentList parseArgumentList(int args) {
+    private ArgumentList parseArgumentList(OptionalInt args) {
         expectChar('(');
         whitespace();
-        Value[] values = new Value[args];
-        if (args == 0) {
+        if (args.isEmpty()) {
+            if (peek() == ')') {
+                advance();
+                return new ArgumentList(new Value[0]);
+            }
+            Value[] values = new Value[8];
+            int count = 0;
+            values[count++] = parseExpression();
+            whitespace();
+            while (peek() == ',') {
+                advance();
+                whitespace();
+                if (count >= values.length) {
+                    values = Arrays.copyOf(values, values.length * 2);
+                }
+                values[count++] = parseExpression();
+                whitespace();
+            }
+            expectChar(')');
+            return new ArgumentList(Arrays.copyOf(values, count));
+        }
+        int n = args.getAsInt();
+        Value[] values = new Value[n];
+        if (n == 0) {
             expectChar(')');
             return new ArgumentList(new Value[0]);
         }
         values[0] = parseExpression();
         whitespace();
-        for (int i = 1; i < args; i++) {
+        for (int i = 1; i < n; i++) {
             expectChar(',');
             whitespace();
             values[i] = parseExpression();
             whitespace();
         }
-
         expectChar(')');
         return new ArgumentList(values);
-    }
-
-    private ArgumentList parseArgumentListVariable() {
-        expectChar('(');
-        whitespace();
-        if (peek() == ')') {
-            advance();
-            return new ArgumentList(new Value[0]);
-        }
-        Value[] values = new Value[8];
-        int count = 0;
-        values[count++] = parseExpression();
-        whitespace();
-        while (peek() == ',') {
-            advance();
-            whitespace();
-            if (count >= values.length) {
-                values = Arrays.copyOf(values, values.length * 2);
-            }
-            values[count++] = parseExpression();
-            whitespace();
-        }
-        expectChar(')');
-        return new ArgumentList(Arrays.copyOf(values, count));
     }
 
     public CompiledExpression parse() {
