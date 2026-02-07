@@ -114,6 +114,16 @@ public class ExpressionEnv {
 	}
 
 	/**
+	 * Adds a variable-args Function that accepts any number of arguments.
+	 * @param name The function name
+	 * @param func The lambda to accept the arguments as a double array and return a value
+	 */
+	public ExpressionEnv addFunction(String name, ToDoubleFunction<double[]> func) {
+		addFunction(new Function(name, Function.VARIABLE_ARGS, func));
+		return this;
+	}
+
+	/**
 	 * @return The prefix tree of all leading operators, including unary operators and functions
 	 */
 	public CharTree<Token> getLeadingOperators() {

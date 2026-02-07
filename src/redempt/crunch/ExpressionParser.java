@@ -14,6 +14,8 @@ import redempt.crunch.token.UnaryOperation;
 import redempt.crunch.token.UnaryOperator;
 import redempt.crunch.token.Value;
 
+import java.util.Arrays;
+
 public class ExpressionParser {
 
     private final String input;
@@ -181,7 +183,9 @@ public class ExpressionParser {
                 return new UnaryOperation(op, term);
             case FUNCTION:
                 Function function = (Function) token;
-                ArgumentList args = parseArgumentList(function.getArgCount());
+                ArgumentList args = function.isVariableArgs()
+                    ? parseArgumentListVariable()
+                    : parseArgumentList(function.getArgCount());
                 return new FunctionCall(function, args.getArguments());
         }
         error("Expected leading operation");
@@ -207,6 +211,30 @@ public class ExpressionParser {
 
         expectChar(')');
         return new ArgumentList(values);
+    }
+
+    private ArgumentList parseArgumentListVariable() {
+        expectChar('(');
+        whitespace();
+        if (peek() == ')') {
+            advance();
+            return new ArgumentList(new Value[0]);
+        }
+        Value[] values = new Value[8];
+        int count = 0;
+        values[count++] = parseExpression();
+        whitespace();
+        while (peek() == ',') {
+            advance();
+            whitespace();
+            if (count >= values.length) {
+                values = Arrays.copyOf(values, values.length * 2);
+            }
+            values[count++] = parseExpression();
+            whitespace();
+        }
+        expectChar(')');
+        return new ArgumentList(Arrays.copyOf(values, count));
     }
 
     public CompiledExpression parse() {
