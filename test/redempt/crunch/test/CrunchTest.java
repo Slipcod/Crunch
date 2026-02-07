@@ -91,6 +91,7 @@ class CrunchTest {
 		assertEquals(4, Crunch.compileExpression("four()", env).evaluate(), "No-argument function");
 		assertThrows(ExpressionCompilationException.class, () -> Crunch.compileExpression("mult", env), "No argument list");
 		assertThrows(ExpressionCompilationException.class, () -> Crunch.compileExpression("mult(1)", env), "Not enough arguments");
+		assertThrows(ExpressionCompilationException.class, () -> Crunch.compileExpression("mult()", env), "Not enough arguments");
 		assertThrows(ExpressionCompilationException.class, () -> Crunch.compileExpression("mult(1, 2, 3)", env), "Too many arguments");
 	}
 

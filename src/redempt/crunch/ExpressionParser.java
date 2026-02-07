@@ -14,7 +14,7 @@ import redempt.crunch.token.UnaryOperation;
 import redempt.crunch.token.UnaryOperator;
 import redempt.crunch.token.Value;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.OptionalInt;
 
 public class ExpressionParser {
@@ -194,43 +194,28 @@ public class ExpressionParser {
     private ArgumentList parseArgumentList(OptionalInt args) {
         expectChar('(');
         whitespace();
-        if (args.isEmpty()) {
-            if (peek() == ')') {
-                advance();
-                return new ArgumentList(new Value[0]);
+        int initialCapacity = args.isPresent() ? args.getAsInt() : 0;
+        ArrayList<Value> list = new ArrayList<>(initialCapacity);
+        if (peek() == ')') {
+            advance();
+            if (args.isPresent() && args.getAsInt() != 0) {
+                error("Expected " + args.getAsInt() + " arguments");
             }
-            Value[] values = new Value[8];
-            int count = 0;
-            values[count++] = parseExpression();
-            whitespace();
-            while (peek() == ',') {
-                advance();
-                whitespace();
-                if (count >= values.length) {
-                    values = Arrays.copyOf(values, values.length * 2);
-                }
-                values[count++] = parseExpression();
-                whitespace();
-            }
-            expectChar(')');
-            return new ArgumentList(Arrays.copyOf(values, count));
-        }
-        int n = args.getAsInt();
-        Value[] values = new Value[n];
-        if (n == 0) {
-            expectChar(')');
             return new ArgumentList(new Value[0]);
         }
-        values[0] = parseExpression();
+        list.add(parseExpression());
         whitespace();
-        for (int i = 1; i < n; i++) {
-            expectChar(',');
+        while (peek() == ',') {
+            advance();
             whitespace();
-            values[i] = parseExpression();
+            list.add(parseExpression());
             whitespace();
         }
         expectChar(')');
-        return new ArgumentList(values);
+        if (args.isPresent() && list.size() != args.getAsInt()) {
+            error("Expected " + args.getAsInt() + " arguments but got " + list.size());
+        }
+        return new ArgumentList(list.toArray(new Value[0]));
     }
 
     public CompiledExpression parse() {

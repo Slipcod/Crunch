@@ -16,7 +16,7 @@ public class FunctionCall implements Value {
 	public FunctionCall(Function function, Value[] values) {
 		this.function = function;
 		this.values = values;
-		numbers = new double[function.getArgCount().isEmpty() ? values.length : function.getArgCount().getAsInt()];
+		numbers = new double[values.length];
 	}
 	
 	@Override
