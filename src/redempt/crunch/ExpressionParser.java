@@ -197,10 +197,10 @@ public class ExpressionParser {
         int initialCapacity = args.isPresent() ? args.getAsInt() : 0;
         ArrayList<Value> list = new ArrayList<>(initialCapacity);
         if (peek() == ')') {
-            advance();
             if (args.isPresent() && args.getAsInt() != 0) {
                 error("Expected " + args.getAsInt() + " arguments");
             }
+            advance();
             return new ArgumentList(new Value[0]);
         }
         list.add(parseExpression());
@@ -211,10 +211,10 @@ public class ExpressionParser {
             list.add(parseExpression());
             whitespace();
         }
-        expectChar(')');
         if (args.isPresent() && list.size() != args.getAsInt()) {
             error("Expected " + args.getAsInt() + " arguments but got " + list.size());
         }
+        expectChar(')');
         return new ArgumentList(list.toArray(new Value[0]));
     }
 
