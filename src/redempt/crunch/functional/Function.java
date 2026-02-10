@@ -3,6 +3,7 @@ package redempt.crunch.functional;
 import redempt.crunch.token.Token;
 import redempt.crunch.token.TokenType;
 
+import java.util.OptionalInt;
 import java.util.function.ToDoubleFunction;
 
 /**
@@ -10,34 +11,34 @@ import java.util.function.ToDoubleFunction;
  * @author Redempt
  */
 public class Function implements Token {
-	
+
 	private final String name;
-	private final int argCount;
+	private final OptionalInt argCount;
 	private final ToDoubleFunction<double[]> function;
-	
+
 	/**
 	 * Create a Function
 	 * @param name The function name
-	 * @param argCount The number of arguments this Function will take
+	 * @param argCount The number of arguments this Function will take, or empty for variable args
 	 * @param function A lambda to take the arguments as a double array and return a value
 	 */
-	public Function(String name, int argCount, ToDoubleFunction<double[]> function) {
+	public Function(String name, OptionalInt argCount, ToDoubleFunction<double[]> function) {
 		this.function = function;
 		this.name = name;
 		this.argCount = argCount;
 	}
-	
+
 	/**
 	 * @return The name of this function
 	 */
 	public String getName() {
 		return name;
 	}
-	
+
 	/**
-	 * @return The number of arguments this function takes
+	 * @return The number of arguments this function takes, or empty if it accepts any number
 	 */
-	public int getArgCount() {
+	public OptionalInt getArgCount() {
 		return argCount;
 	}
 	

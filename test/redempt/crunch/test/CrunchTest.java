@@ -91,7 +91,54 @@ class CrunchTest {
 		assertEquals(4, Crunch.compileExpression("four()", env).evaluate(), "No-argument function");
 		assertThrows(ExpressionCompilationException.class, () -> Crunch.compileExpression("mult", env), "No argument list");
 		assertThrows(ExpressionCompilationException.class, () -> Crunch.compileExpression("mult(1)", env), "Not enough arguments");
+		assertThrows(ExpressionCompilationException.class, () -> Crunch.compileExpression("mult()", env), "Not enough arguments");
 		assertThrows(ExpressionCompilationException.class, () -> Crunch.compileExpression("mult(1, 2, 3)", env), "Too many arguments");
+	}
+
+	@Test
+	void variableArgsFunctionTest() {
+		ExpressionEnv env = new ExpressionEnv();
+		env.addFunction("sum", d -> {
+			double s = 0;
+			for (double v : d) s += v;
+			return s;
+		});
+		env.addFunction("max", d -> {
+			if (d.length == 0) return 0;
+			double m = d[0];
+			for (int i = 1; i < d.length; i++) m = Math.max(m, d[i]);
+			return m;
+		});
+		env.addFunction("min", d -> {
+			if (d.length == 0) return 0;
+			double m = d[0];
+			for (int i = 1; i < d.length; i++) m = Math.min(m, d[i]);
+			return m;
+		});
+		env.addFunction("avg", d -> {
+			if (d.length == 0) return 0;
+			double s = 0;
+			for (double v : d) s += v;
+			return s / d.length;
+		});
+		assertEquals(0, Crunch.compileExpression("sum()", env).evaluate(), DELTA);
+		assertEquals(6, Crunch.compileExpression("sum(1, 2, 3)", env).evaluate(), DELTA);
+		assertEquals(10, Crunch.compileExpression("sum(1, 2, 3, 4)", env).evaluate(), DELTA);
+		assertEquals(-1, Crunch.compileExpression("sum(1, 2, -4)", env).evaluate(), DELTA);
+		assertEquals(5, Crunch.compileExpression("max(1, 5, 3)", env).evaluate(), DELTA);
+		assertEquals(2, Crunch.compileExpression("max(1, 2, -3)", env).evaluate(), DELTA);
+		assertEquals(-1, Crunch.compileExpression("max(-1, -2, -3)", env).evaluate(), DELTA);
+		assertEquals(-3, Crunch.compileExpression("max(-3)", env).evaluate(), DELTA);
+		assertEquals(83080, Crunch.compileExpression("max( 0.0, (378044 * 100 / 100.0 - 294964) * 1.0 ) - 0.0", env).evaluate(), DELTA);
+		assertEquals(0, Crunch.compileExpression("max()", env).evaluate(), DELTA);
+		assertEquals(1, Crunch.compileExpression("min(1, 5, 3)", env).evaluate(), DELTA);
+		assertEquals(-5, Crunch.compileExpression("min(-1, -5, 0)", env).evaluate(), DELTA);
+		assertEquals(-3, Crunch.compileExpression("min(-3)", env).evaluate(), DELTA);
+		assertEquals(0, Crunch.compileExpression("min()", env).evaluate(), DELTA);
+		assertEquals(2.5, Crunch.compileExpression("avg(1, 2, 3, 4)", env).evaluate(), DELTA);
+		assertEquals(-10, Crunch.compileExpression("avg(-10)", env).evaluate(), DELTA);
+		assertEquals(10, Crunch.compileExpression("avg(10)", env).evaluate(), DELTA);
+		assertEquals(0, Crunch.compileExpression("avg()", env).evaluate(), DELTA);
 	}
 
 	@Test

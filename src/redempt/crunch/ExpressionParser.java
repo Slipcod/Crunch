@@ -14,6 +14,9 @@ import redempt.crunch.token.UnaryOperation;
 import redempt.crunch.token.UnaryOperator;
 import redempt.crunch.token.Value;
 
+import java.util.ArrayList;
+import java.util.OptionalInt;
+
 public class ExpressionParser {
 
     private final String input;
@@ -188,25 +191,31 @@ public class ExpressionParser {
         return null;
     }
 
-    private ArgumentList parseArgumentList(int args) {
+    private ArgumentList parseArgumentList(OptionalInt args) {
         expectChar('(');
         whitespace();
-        Value[] values = new Value[args];
-        if (args == 0) {
-            expectChar(')');
+        int initialCapacity = args.isPresent() ? args.getAsInt() : 0;
+        ArrayList<Value> list = new ArrayList<>(initialCapacity);
+        if (peek() == ')') {
+            if (args.isPresent() && args.getAsInt() != 0) {
+                error("Expected " + args.getAsInt() + " arguments");
+            }
+            advance();
             return new ArgumentList(new Value[0]);
         }
-        values[0] = parseExpression();
+        list.add(parseExpression());
         whitespace();
-        for (int i = 1; i < args; i++) {
-            expectChar(',');
+        while (peek() == ',') {
+            advance();
             whitespace();
-            values[i] = parseExpression();
+            list.add(parseExpression());
             whitespace();
         }
-
+        if (args.isPresent() && list.size() != args.getAsInt()) {
+            error("Expected " + args.getAsInt() + " arguments but got " + list.size());
+        }
         expectChar(')');
-        return new ArgumentList(values);
+        return new ArgumentList(list.toArray(new Value[0]));
     }
 
     public CompiledExpression parse() {

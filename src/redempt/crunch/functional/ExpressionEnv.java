@@ -5,6 +5,7 @@ import redempt.crunch.token.*;
 import redempt.crunch.Variable;
 
 import java.util.Locale;
+import java.util.OptionalInt;
 import java.util.function.DoubleSupplier;
 import java.util.function.ToDoubleFunction;
 
@@ -109,7 +110,17 @@ public class ExpressionEnv {
 	 * @param func The lambda to accept the arguments as a double array and return a value
 	 */
 	public ExpressionEnv addFunction(String name, int argCount, ToDoubleFunction<double[]> func) {
-		addFunction(new Function(name, argCount, func));
+		addFunction(new Function(name, OptionalInt.of(argCount), func));
+		return this;
+	}
+
+	/**
+	 * Adds a variable-args Function that accepts any number of arguments.
+	 * @param name The function name
+	 * @param func The lambda to accept the arguments as a double array and return a value
+	 */
+	public ExpressionEnv addFunction(String name, ToDoubleFunction<double[]> func) {
+		addFunction(new Function(name, OptionalInt.empty(), func));
 		return this;
 	}
 
