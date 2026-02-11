@@ -169,6 +169,19 @@ public class ExpressionParser {
                 break;
             }
         }
+        // Scientific notation: e or E, optional +/-, then digits
+        if (!isAtEnd() && (peek() == 'e' || peek() == 'E')) {
+            advanceCursor();
+            if (!isAtEnd() && (peek() == '+' || peek() == '-')) {
+                advanceCursor();
+            }
+            if (isAtEnd() || !Character.isDigit(peek())) {
+                error("Exponent digits expected in scientific notation");
+            }
+            while (!isAtEnd() && Character.isDigit(peek())) {
+                advanceCursor();
+            }
+        }
         return new LiteralValue(FastNumberParsing.parseDouble(input, start, cursor));
     }
 
